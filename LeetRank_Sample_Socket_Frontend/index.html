@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Socket.IO Redis Demo</title>
+</head>
+<body>
+    <h1>Socket.IO and Redis Demo</h1>
+
+    <button type="button" id="btn">Set User ID</button>
+    <button id="connectionBtn">Fetch Connection ID</button>
+
+    <div id="connectionResponse"></div>
+    <div id="submissionResponse"></div>
+
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    <script>
+        // Connect to Socket.IO backend
+        const socket = io('http://localhost:3004');
+        const userId = "1"; // Hardcoded userId for demo
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // Listen for connection to server
+            socket.on('connect', () => {
+                console.log('Connected to server with socket ID:', socket.id);
+            });
+
+            // Set the user ID when the button is clicked
+            document.getElementById('btn').addEventListener('click', () => {
+                console.log(`Emitting set user id: ${userId}`);
+                socket.emit('setUserId', userId); // Emit setUserId event
+            });
+
+            // Fetch connection ID when the button is clicked
+            document.getElementById('connectionBtn').addEventListener('click', () => {
+                console.log("Emitting getConnectionId for userId:", userId);
+                socket.emit('getConnectionId', userId); // Emit getConnectionId event
+            });
+
+            // Listen for the 'connectionId' event from the server
+            socket.on('connectionId', (data) => {
+                console.log("Received connection ID from server:", data);
+                document.getElementById('connectionResponse').textContent = data ? `Connection ID: ${data}` : "No connection ID found";
+            });
+
+            // Listen for the 'submissionPayloadResponse' event
+            socket.on("submissionPayloadResponse", (data) => {
+                console.log("Received submission payload from server:", data);
+                document.getElementById('submissionResponse').textContent = `Payload: ${JSON.stringify(data)}`;
+            });
+
+            // Handle disconnection
+            socket.on('disconnect', () => {
+                console.log('Disconnected from server');
+            });
+        });
+    </script>
+</body>
+</html>
